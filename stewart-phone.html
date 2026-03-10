@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📱 斯图尔特的手机 · 鹈鹕镇日记</title>
+    <style>
+        /* 全局重置 & 字体 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Georgia', serif;
+        }
+
+        body {
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* 手机外壳 */
+        .phone {
+            width: 390px;
+            height: 780px;
+            background: #0a0a0c;
+            border-radius: 48px;
+            padding: 12px 6px;
+            box-shadow: 0 40px 70px rgba(0,0,0,0.9);
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        /* 灵动岛装饰 */
+        .dynamic-island {
+            width: 110px;
+            height: 28px;
+            background: #1d1d1f;
+            border-radius: 30px;
+            margin: 0 auto 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 14px;
+        }
+        .time-indicator {
+            color: #d4c9b0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .status-icons {
+            color: #a0957a;
+            font-size: 12px;
+            display: flex;
+            gap: 6px;
+        }
+
+        /* 主屏幕区域 */
+        .screen {
+            background: #2a2a2a;
+            width: 100%;
+            height: calc(100% - 50px);
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 0 1px rgba(212, 201, 176, 0.1);
+        }
+
+        /* 所有view通用隐藏/显示切换 */
+        .view {
+            width: 100%;
+            height: 100%;
+            background: #2a2a2a;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: none;
+            position: relative;
+        }
+        .view.active {
+            display: flex;
+        }
+        .view::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* ----- 主屏幕布局 ----- */
+        .home-screen {
+            padding: 20px 18px 12px;
+        }
+        .fake-status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: 600;
+            color: #d4c9b0;
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px 10px;
+            margin: 10px 0 30px;
+        }
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .icon-bg {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            background: #3a3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+            border: 1px solid #444;
+        }
+        .app-icon:active .icon-bg {
+            transform: scale(0.95);
+        }
+        .app-name {
+            font-size: 11px;
+            font-weight: 500;
+            color: #d4c9b0;
+            text-align: center;
+        }
+
+        /* 个性应用配色 */
+        .journal .icon-bg { background: #b83b5e; color: #fff; }
+        .library .icon-bg { background: #4a6741; color: #fff; }
+        .camera .icon-bg { background: #6b5b95; color: #fff; }
+        .notes .icon-bg { background: #8b4513; color: #fff; }
+        .museum .icon-bg { background: #2c3e50; color: #fff; }
+        .farm .icon-bg { background: #556b2f; color: #fff; }
+        .church .icon-bg { background: #708090; color: #fff; }
+        .settings .icon-bg { background: #666; color: #fff; }
+
+        /* ----- 通用导航栏 (返回+标题) ----- */
+        .app-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #333;
+            border-bottom: 1px solid #444;
+        }
+        .back-btn {
+            font-size: 28px;
+            line-height: 1;
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            color: #b83b5e;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-left: 12px;
+            letter-spacing: -0.3px;
+            color: #d4c9b0;
+        }
+
+        /* 底部导航栏 */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 16px 12px;
+            background: #333;
+            border-top: 1px solid #444;
+            margin-top: auto;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            color: #a0957a;
+        }
+        .nav-item.active {
+            color: #b83b5e;
+            font-weight: 600;
+        }
+        .nav-item span:first-child {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        /* ----- 日记页面 ----- */
+        .journal-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #2a2a2a;
+        }
+
+        .journal-entry {
+            padding: 18px 16px;
+            border-bottom: 1px solid #444;
+            background: #2a2a2a;
+        }
+        .journal-date {
+            color: #b83b5e;
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .journal-content {
+            color: #d4c9b0;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        .journal-mood {
+            font-size: 12px;
+            color: #a0957a;
+            font-style: italic;
+        }
+
+        /* ----- 图书馆页面 ----- */
+        .library-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #2a2a2a;
+        }
+
+        .book-item {
+            padding: 16px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            gap: 12px;
+        }
+        .book-cover {
+            width: 60px;
+            height: 80px;
+            background: #4a6741;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 24px;
+        }
+        .book-info {
+            flex: 1;
+        }
+        .book-title {
+            color: #d4c9b0;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .book-author {
+            color: #a0957a;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .book-status {
+            font-size: 12px;
+            color: #b83b5e;
+        }
+
+        /* ----- 相机页面 ----- */
+        .camera-container {
+            flex: 1;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .camera-preview {
+            flex: 1;
+            background: linear-gradient(45deg, #1a1a1a, #333);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4c9b0;
+            font-size: 18px;
+        }
+
+        .camera-controls {
+            padding: 20px;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .camera-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #d4c9b0;
+            border: 3px solid #333;
+            cursor: pointer;
+        }
+        .camera-other {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4c9b0;
+        }
+
+        /* ----- 笔记页面 ----- */
+        .notes-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #2a2a2a;
+        }
+
+        .note-item {
+            background: #333;
+            padding: 16px;
+            border-radius: 14px;
+            margin: 12px;
+            border-left: 4px solid #b83b5e;
+        }
+        .note-date {
+            color: #a0957a;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .note-content {
+            color: #d4c9b0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* ----- 博物馆页面 ----- */
+        .museum-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #2a2a2a;
+        }
+
+        .artifact-item {
+            padding: 16px;
+            border-bottom: 1px solid #444;
+        }
+        .artifact-name {
+            color: #d4c9b0;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .artifact-description {
+            color: #a0957a;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* ----- 农场页面 ----- */
+        .farm-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #2a2a2a;
+        }
+
+        .farm-section {
+            padding: 16px;
+            border-bottom: 1px solid #444;
+        }
+        .farm-title {
+            color: #d4c9b0;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .crop-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+        }
+        .crop-name {
+            color: #d4c9b0;
+        }
+        .crop-status {
+            color: #a0957a;
+            font-size: 14px;
+        }
+
+        /* 发布按钮 */
+        .post-btn {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #b83b5e;
+            color: white;
+            border: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(184, 59, 94, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* 底部dock栏 */
+        .dock {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-around;
+            padding: 16px 0;
+        }
+        .dock-indicator {
+            background: #444;
+            width: 140px;
+            height: 5px;
+            border-radius: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone">
+        <div class="dynamic-island">
+            <span class="time-indicator" id="live-time">20:14</span>
+            <span class="status-icons">📶 4G 🔋 92%</span>
+        </div>
+        <div class="screen">
+            <!-- 主屏幕 view (默认激活) -->
+            <div id="home-view" class="view home-screen active">
+                <div class="fake-status">
+                    <span>📶 4G</span>
+                    <span>10月31日 周六</span>
+                    <span>🔋 92%</span>
+                </div>
+                <!-- 应用网格 -->
+                <div class="app-grid">
+                    <!-- 日记 -->
+                    <div class="app-icon journal" data-target="journal-view">
+                        <div class="icon-bg">📖</div>
+                        <span class="app-name">日记</span>
+                    </div>
+                    <!-- 图书馆 -->
+                    <div class="app-icon library" data-target="library-view">
+                        <div class="icon-bg">📚</div>
+                        <span class="app-name">图书馆</span>
+                    </div>
+                    <!-- 相机 -->
+                    <div class="app-icon camera" data-target="camera-view">
+                        <div class="icon-bg">📷</div>
+                        <span class="app-name">相机</span>
+                    </div>
+                    <!-- 笔记 -->
+                    <div class="app-icon notes" data-target="notes-view">
+                        <div class="icon-bg">📝</div>
+                        <span class="app-name">笔记</span>
+                    </div>
+                    <!-- 博物馆 -->
+                    <div class="app-icon museum" data-target="museum-view">
+                        <div class="icon-bg">🏛️</div>
+                        <span class="app-name">博物馆</span>
+                    </div>
+                    <!-- 农场 -->
+                    <div class="app-icon farm" data-target="farm-view">
+                        <div class="icon-bg">🌾</div>
+                        <span class="app-name">农场</span>
+                    </div>
+                    <!-- 教堂 -->
+                    <div class="app-icon church" data-target="church-view">
+                        <div class="icon-bg">✝️</div>
+                        <span class="app-name">教堂</span>
+                    </div>
+                    <!-- 设置 -->
+                    <div class="app-icon settings" data-target="settings-view">
+                        <div class="icon-bg">⚙️</div>
+                        <span class="app-name">设置</span>
+                    </div>
+                </div>
+                <!-- 底部dock栏 -->
+                <div class="dock">
+                    <div class="dock-indicator"></div>
+                </div>
+            </div>
+
+            <!-- 日记视图 -->
+            <div id="journal-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">日记本</span>
+                </div>
+                <div class="journal-container">
+                    <div class="journal-entry">
+                        <div class="journal-date">2026年10月31日 周六</div>
+                        <div class="journal-content">
+                            今天是万圣节，鹈鹕镇的氛围很特别。我在山顶看到了奇怪的光，似乎是某种信号。通灵能力偶尔会出现，但已经不如从前敏锐了。冈瑟给了我一本古老的书籍，关于猎巫时期的记录。
+                        </div>
+                        <div class="journal-mood">心情：平静中带着好奇</div>
+                    </div>
+                    <div class="journal-entry">
+                        <div class="journal-date">2026年10月30日 周五</div>
+                        <div class="journal-content">
+                            农场的作物长得很好，我种了一些特别的植物。露娜洛尔的发光卵仍然让我心有余悸，上次被蛰的手指还在隐隐作痛。海莉想要借我的相机，她对复古风格很感兴趣。
+                        </div>
+                        <div class="journal-mood">心情：忙碌但充实</div>
+                    </div>
+                    <div class="journal-entry">
+                        <div class="journal-date">2026年10月29日 周四</div>
+                        <div class="journal-content">
+                            在图书馆整理文献时发现了一些关于祖祖城的记录。那个地方似乎隐藏着很多秘密。晚上在山顶望着隔岸的灯光，感觉时间在这里变得很慢。
+                        </div>
+                        <div class="journal-mood">心情：沉思</div>
+                    </div>
+                </div>
+                <button class="post-btn" onclick="openJournalModal()">+</button>
+            </div>
+
+            <!-- 图书馆视图 -->
+            <div id="library-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">图书馆</span>
+                </div>
+                <div class="library-container">
+                    <div class="book-item">
+                        <div class="book-cover">📜</div>
+                        <div class="book-info">
+                            <div class="book-title">猎巫史录</div>
+                            <div class="book-author">匿名</div>
+                            <div class="book-status">正在阅读</div>
+                        </div>
+                    </div>
+                    <div class="book-item">
+                        <div class="book-cover">🔮</div>
+                        <div class="book-info">
+                            <div class="book-title">通灵术指南</div>
+                            <div class="book-author">古代神职人员</div>
+                            <div class="book-status">已读完</div>
+                        </div>
+                    </div>
+                    <div class="book-item">
+                        <div class="book-cover">🏞️</div>
+                        <div class="book-info">
+                            <div class="book-title">鹈鹕镇历史</div>
+                            <div class="book-author">冈瑟</div>
+                            <div class="book-status">未读</div>
+                        </div>
+                    </div>
+                    <div class="book-item">
+                        <div class="book-cover">🌾</div>
+                        <div class="book-info">
+                            <div class="book-title">农场经营指南</div>
+                            <div class="book-author">皮埃尔</div>
+                            <div class="book-status">正在阅读</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 相机视图 -->
+            <div id="camera-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">相机</span>
+                </div>
+                <div class="camera-container">
+                    <div class="camera-preview">
+                        <div>📷 复古相机</div>
+                        <div style="font-size: 14px; margin-top: 20px; color: #a0957a;">海莉很喜欢这个相机的风格</div>
+                    </div>
+                    <div class="camera-controls">
+                        <div class="camera-other">⚡</div>
+                        <button class="camera-btn"></button>
+                        <div class="camera-other">🔄</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 笔记视图 -->
+            <div id="notes-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">笔记</span>
+                </div>
+                <div class="notes-container">
+                    <div class="note-item">
+                        <div class="note-date">10月31日</div>
+                        <div class="note-content">真的很酷，据说她的头发原来并不是紫色的。如果是一块点心，我想更多的是金属外形，以融化的驼鹿肉糜和不规则电线为夹心……哇，真的会有人喜欢这种东西么？</div>
+                    </div>
+                    <div class="note-item">
+                        <div class="note-date">10月30日</div>
+                        <div class="note-content">今天很闲，适合钓鱼。什么，金色品质？朋友，或许你需要它饱餐一顿！</div>
+                    </div>
+                    <div class="note-item">
+                        <div class="note-date">10月29日</div>
+                        <div class="note-content">今天路过博物馆碰见**躲在屋檐下。可惜我的兜里只剩兔子脚啦……抱歉，我不是故意的。</div>
+                    </div>
+                    <div class="note-item">
+                        <div class="note-date">10月28日</div>
+                        <div class="note-content">其实我不喜欢看科幻小说。但貌似这是正确答案的样子。嗯，勉强看一点吧，朋友，但这真的太勉强了。我妈在家里瞪着我超过三秒都不会吃的程度……</div>
+                    </div>
+                    <div class="note-item">
+                        <div class="note-date">10月27日</div>
+                        <div class="note-content">露娜洛尔的发光卵可以制成强大的试剂。那有没有什么体面的方法能捞到它？抱歉，我前阵子试图把它从海里捞起来结果把我两根最重要的手指头蛰伤了，现在还心有余悸。所以我专门网购了一大包海蜇来凉拌，事实证明，露娜洛尔之所以强大是因为有毒……唉。</div>
+                    </div>
+                </div>
+                <button class="post-btn" onclick="openNoteModal()">+</button>
+            </div>
+
+            <!-- 博物馆视图 -->
+            <div id="museum-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">博物馆</span>
+                </div>
+                <div class="museum-container">
+                    <div class="artifact-item">
+                        <div class="artifact-name">中世纪风箱</div>
+                        <div class="artifact-description">用于生火的古老工具，在斯图尔特的杂物箱中发现。看起来已经有几百年的历史了。</div>
+                    </div>
+                    <div class="artifact-item">
+                        <div class="artifact-name">红鸽血扭戒</div>
+                        <div class="artifact-description">一枚暗淡的红鸽血扭戒，放在衣柜的最底层。无从得知戒指真正的主人是谁。</div>
+                    </div>
+                    <div class="artifact-item">
+                        <div class="artifact-name">半框平光镜</div>
+                        <div class="artifact-description">斯图尔特常年佩戴的眼镜，虽然没有度数，但对她来说很重要。</div>
+                    </div>
+                    <div class="artifact-item">
+                        <div class="artifact-name">十字架耳钉</div>
+                        <div class="artifact-description">单边佩戴的十字架耳钉，是斯图尔特作为神职人员的象征。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 农场视图 -->
+            <div id="farm-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">农场</span>
+                </div>
+                <div class="farm-container">
+                    <div class="farm-section">
+                        <div class="farm-title">作物状态</div>
+                        <div class="crop-item">
+                            <div class="crop-name">小麦</div>
+                            <div class="crop-status">生长中 (3/7)</div>
+                        </div>
+                        <div class="crop-item">
+                            <div class="crop-name">南瓜</div>
+                            <div class="crop-status">即将成熟 (6/7)</div>
+                        </div>
+                        <div class="crop-item">
+                            <div class="crop-name">草莓</div>
+                            <div class="crop-status">已成熟</div>
+                        </div>
+                        <div class="crop-item">
+                            <div class="crop-name">蓝莓</div>
+                            <div class="crop-status">生长中 (2/7)</div>
+                        </div>
+                    </div>
+                    <div class="farm-section">
+                        <div class="farm-title">动物</div>
+                        <div class="crop-item">
+                            <div class="crop-name">鸡</div>
+                            <div class="crop-status">健康</div>
+                        </div>
+                        <div class="crop-item">
+                            <div class="crop-name">牛</div>
+                            <div class="crop-status">健康</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 教堂视图 -->
+            <div id="church-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">教堂</span>
+                </div>
+                <div class="journal-container">
+                    <div class="journal-entry">
+                        <div class="journal-date">教堂记录</div>
+                        <div class="journal-content">
+                            作为曾经的神职人员，斯图尔特对教堂有着特殊的感情。虽然现在不再全职工作，但她偶尔会来这里整理文献，回忆过去的时光。
+                        </div>
+                        <div class="journal-mood">氛围：神圣而宁静</div>
+                    </div>
+                    <div class="journal-entry">
+                        <div class="journal-date">历史文献</div>
+                        <div class="journal-content">
+                            教堂的档案室里保存着许多古老的文献，记录着鹈鹕镇的历史和猎巫时期的故事。斯图尔特对此非常感兴趣，经常在这里查阅资料。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置视图 -->
+            <div id="settings-view" class="view">
+                <div class="app-header">
+                    <button class="back-btn" data-back="home-view">←</button>
+                    <span class="header-title">设置</span>
+                </div>
+                <div class="journal-container">
+                    <div class="journal-entry">
+                        <div class="journal-date">个人信息</div>
+                        <div class="journal-content">
+                            姓名：斯图尔特<br>
+                            年龄：未知<br>
+                            职业：前神职人员、农场主、前记者<br>
+                            特长：通灵术、历史研究、农场经营
+                        </div>
+                    </div>
+                    <div class="journal-entry">
+                        <div class="journal-date">偏好设置</div>
+                        <div class="journal-content">
+                            主题：复古神秘<br>
+                            通知：开启<br>
+                            隐私：高
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // 切换视图
+            const views = document.querySelectorAll('.view');
+            const appIcons = document.querySelectorAll('.app-icon[data-target]');
+            const backBtns = document.querySelectorAll('.back-btn');
+
+            function showView(targetId) {
+                views.forEach(v => v.classList.remove('active'));
+                const target = document.getElementById(targetId);
+                if (target) target.classList.add('active');
+            }
+
+            appIcons.forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const targetId = icon.getAttribute('data-target');
+                    if (targetId) showView(targetId);
+                });
+            });
+
+            backBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const backId = btn.getAttribute('data-back');
+                    if (backId) showView(backId);
+                });
+            });
+
+            // 更新时间
+            function updateTime() {
+                const timeEl = document.getElementById('live-time');
+                if (timeEl) {
+                    const now = new Date();
+                    const hours = now.getHours().toString().padStart(2,'0');
+                    const mins = now.getMinutes().toString().padStart(2,'0');
+                    timeEl.innerText = `${hours}:${mins}`;
+                }
+            }
+            setInterval(updateTime, 1000);
+            updateTime();
+        })();
+
+        // 模态框功能
+        function openJournalModal() {
+            alert('撰写新日记');
+        }
+
+        function openNoteModal() {
+            alert('添加新笔记');
+        }
+    </script>
+</body>
+</html>
